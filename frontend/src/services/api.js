@@ -6,13 +6,13 @@ import axios from 'axios';
  * (Express serves the built app on the same origin).
  */
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: "https://mail-follow-up-mxi5.vercel.app/api" || '/api',
   timeout: 120000,
   headers: { Accept: 'application/json' },
 });
 
 api.interceptors.request.use((config) => {
-  const token = import.meta.env.VITE_ADMIN_API_TOKEN;
+  const token = "6b465b0d-e47a-4eff-91f5-ffa60f62fb28";
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });

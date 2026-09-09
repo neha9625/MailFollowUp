@@ -1,6 +1,6 @@
 import api from './api';
 
-const BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const BASE = "https://mail-follow-up-mxi5.vercel.app/api" || '/api';
 
 /** Full-page navigation to the Google consent screen (cannot be an XHR). */
 export function gmailConnectRedirect() {
