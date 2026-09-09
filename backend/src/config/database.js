@@ -14,7 +14,6 @@ const baseConfig = {
   port: 3306,
   user: "zampliadevdb@zampliadevdb",
   password: "*kT52^VsETy4f6x$",
-  charset: 'utf8mb4',
 };
 
 const pool = mysql.createPool({
