@@ -7,13 +7,13 @@ const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2/promise');
 
-const DB_NAME = process.env.MYSQL_DATABASE || 'gmail_followup_automation';
+const DB_NAME = "zampliastaging";
 
 const baseConfig = {
-  host: process.env.MYSQL_HOST || '127.0.0.1',
-  port: Number(process.env.MYSQL_PORT || 3306),
-  user: process.env.MYSQL_USERNAME || 'root',
-  password: process.env.MYSQL_PASSWORD || '',
+  host: "zampliadevdb.mysql.database.azure.com",
+  port: 3306,
+  user: "zampliadevdb@zampliadevdb",
+  password: "*kT52^VsETy4f6x$",
   charset: 'utf8mb4',
 };
 
