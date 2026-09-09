@@ -6,7 +6,7 @@ import axios from 'axios';
  * (Express serves the built app on the same origin).
  */
 const api = axios.create({
-  baseURL: "https://mail-follow-up-mxi5.vercel.app/api" || '/api',
+  baseURL: "https://mail-follow-up-fjyb.vercel.app/api" || '/api',
   timeout: 120000,
   headers: { Accept: 'application/json' },
 });

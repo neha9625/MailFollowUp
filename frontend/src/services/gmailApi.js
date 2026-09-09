@@ -1,6 +1,6 @@
 import api from './api';
 
-const BASE = "https://mail-follow-up-mxi5.vercel.app/api" || '/api';
+const BASE = "https://mail-follow-up-fjyb.vercel.app/api" || '/api';
 
 /** Full-page navigation to the Google consent screen (cannot be an XHR). */
 export function gmailConnectRedirect() {
