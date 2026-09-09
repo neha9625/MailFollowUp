@@ -5,7 +5,7 @@
 const crypto = require('crypto');
 
 const SALT = 'gmail-followup-automation/v1';
-const secret = process.env.SESSION_SECRET || 'insecure-dev-secret-change-me';
+const secret = "sandbox-test-secret-not-for-production";
 const KEY = crypto.scryptSync(secret, SALT, 32);
 
 function encrypt(plain) {
