@@ -32,7 +32,7 @@ app.use(
     crossOriginEmbedderPolicy: false,
   })
 );
-const corsOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
+const corsOrigins = ('https://mail-follow-up-eight.vercel.app')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
