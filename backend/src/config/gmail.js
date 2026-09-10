@@ -17,7 +17,7 @@ function isGoogleConfigured() {
 
 function resolveRedirectUri() {
   return (
-    `${process.env.GOOGLE_REDIRECT_URI}/api/gmail/callback`
+    `https://mail-follow-up-fjyb.vercel.app/api/gmail/callback`
   );
 }
 
