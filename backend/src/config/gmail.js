@@ -17,8 +17,7 @@ function isGoogleConfigured() {
 
 function resolveRedirectUri() {
   return (
-    process.env.GOOGLE_REDIRECT_URI ||
-    `${process.env.APP_BASE_URL || 'http://localhost:5000'}/api/gmail/callback`
+    `${process.env.GOOGLE_REDIRECT_URI}/api/gmail/callback`
   );
 }
 
