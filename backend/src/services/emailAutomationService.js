@@ -24,6 +24,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function logSkipped(record, existingLog, weekday, reason) {
   return emailLogService.createLog({
     emailRecordId: record.id,
+    sentFromEmail: existingLog ? existingLog.sent_from_email : null,
     email: record.email,
     name: record.name,
     mailFound: existingLog ? existingLog.mail_found : null,
@@ -62,6 +63,7 @@ async function runAutomation(options = {}) {
       'GMAIL_NOT_CONNECTED'
     );
   }
+  const senderEmail = gmailStatus.email;
 
   // 3. Active Excel file + records
   const activeFile = await excelService.getActiveFile();
@@ -128,7 +130,7 @@ async function runAutomation(options = {}) {
   for (const record of records) {
     try {
       // ── Duplicate-send protection (application level) ──
-      const existingLog = await emailLogService.getSuccessfulLogOnDate(record.id, date);
+      const existingLog = await emailLogService.getSuccessfulLogOnDate(record.id, date, senderEmail);
       if (existingLog) {
         await logSkipped(
           record,
@@ -176,6 +178,7 @@ async function runAutomation(options = {}) {
       // ── Log SUCCESS (unique index = DB-level duplicate protection) ──
       const logResult = await emailLogService.createLog({
         emailRecordId: record.id,
+        sentFromEmail: sent.from,
         email: record.email,
         name: record.name,
         mailFound: found ? 1 : 0,
@@ -215,6 +218,7 @@ async function runAutomation(options = {}) {
       try {
         await emailLogService.createLog({
           emailRecordId: record.id,
+          sentFromEmail: senderEmail,
           email: record.email,
           name: record.name,
           mailFound: null,

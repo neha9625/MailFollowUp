@@ -77,14 +77,16 @@ CREATE TABLE IF NOT EXISTS `gmail_connections` (
 
 -- ----------------------------------------------------------------------------
 -- email_logged : permanent history. NEVER deleted when a new Excel is uploaded.
--- Duplicate-send protection: unique (email_record_id, process_date) — a record
--- can only have ONE successful send per day. FAILED/SKIPPED rows use
+-- Duplicate-send protection: unique (email_record_id, process_date, sent_from_email)
+-- — a record can only have ONE successful send per day per connected account.
+-- FAILED/SKIPPED rows use
 -- process_date = NULL (MySQL allows unlimited NULL duplicates) so they can be
 -- retried safely.
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `email_logged` (
   `id`               INT UNSIGNED  NOT NULL AUTO_INCREMENT,
   `email_record_id`  INT UNSIGNED  NULL DEFAULT NULL,
+  `sent_from_email`  VARCHAR(255)  NULL DEFAULT NULL COMMENT 'Connected Gmail account used to send the message',
   `email`            VARCHAR(255)  NOT NULL,
   `name`             VARCHAR(255)  NULL DEFAULT NULL,
   `mail_found`       TINYINT(1)    NULL DEFAULT NULL COMMENT '1 = previous mail found, 0 = none',
@@ -99,7 +101,7 @@ CREATE TABLE IF NOT EXISTS `email_logged` (
   `process_date`     DATE          NULL DEFAULT NULL,
   `created_at`       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_email_logs_record_process_date` (`email_record_id`, `process_date`),
+  UNIQUE KEY `uq_email_logs_record_process_date_sender` (`email_record_id`, `process_date`, `sent_from_email`),
   KEY `idx_email_logs_email`  (`email`),
   KEY `idx_email_logs_status` (`status`),
   KEY `idx_email_logs_sent_at` (`sent_at`),

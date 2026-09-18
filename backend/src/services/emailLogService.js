@@ -13,6 +13,7 @@ const { pool } = require('../config/database');
 async function createLog(entry) {
   const {
     emailRecordId = null,
+    sentFromEmail = null,
     email,
     name = null,
     mailFound = null,
@@ -30,11 +31,12 @@ async function createLog(entry) {
   try {
     const [result] = await pool.query(
       `INSERT INTO email_logged
-         (email_record_id, email, name, mail_found, email_type, template_type,
+         (email_record_id, sent_from_email, email, name, mail_found, email_type, template_type,
           subject, gmail_message_id, gmail_thread_id, status, error_message, sent_at, process_date)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         emailRecordId,
+        sentFromEmail,
         email,
         name,
         mailFound,
@@ -60,14 +62,14 @@ async function createLog(entry) {
 }
 
 /** Returns the existing SUCCESS log for a record on a given date, if any. */
-async function getSuccessfulLogOnDate(emailRecordId, dateYyyyMmDd) {
-  if (!emailRecordId || !dateYyyyMmDd) return null;
+async function getSuccessfulLogOnDate(emailRecordId, dateYyyyMmDd, sentFromEmail) {
+  if (!emailRecordId || !dateYyyyMmDd || !sentFromEmail) return null;
   const [rows] = await pool.query(
-    `SELECT id, email, name, mail_found, email_type, template_type, subject
+    `SELECT id, sent_from_email, email, name, mail_found, email_type, template_type, subject
      FROM email_logged
-     WHERE email_record_id = ? AND process_date = ? AND status = 'SUCCESS'
+     WHERE email_record_id = ? AND process_date = ? AND sent_from_email = ? AND status = 'SUCCESS'
      ORDER BY id DESC LIMIT 1`,
-    [emailRecordId, dateYyyyMmDd]
+    [emailRecordId, dateYyyyMmDd, sentFromEmail]
   );
   return rows[0] || null;
 }
@@ -76,9 +78,18 @@ async function getSuccessfulLogOnDate(emailRecordId, dateYyyyMmDd) {
  * Filtered, paginated log listing.
  * All values are bound parameters — SQL injection safe.
  */
+async function getConnectedSenderEmail() {
+  const [rows] = await pool.query(
+    `SELECT google_email FROM gmail_connections
+     WHERE id = 1 AND is_connected = 1 AND google_email IS NOT NULL LIMIT 1`
+  );
+  return rows[0]?.google_email || null;
+}
+
 async function listLogs({ page, pageSize, status, emailType, search, dateFrom, dateTo }) {
-  const where = [];
-  const params = [];
+  const senderEmail = await getConnectedSenderEmail();
+  const where = ['sent_from_email = ?'];
+  const params = [senderEmail];
 
   if (search) {
     where.push('(email LIKE ? OR name LIKE ?)');
@@ -112,7 +123,7 @@ async function listLogs({ page, pageSize, status, emailType, search, dateFrom, d
   const offset = (page - 1) * pageSize;
   const [logs] = await pool.query(
     `SELECT id, email_record_id, email, name, mail_found, email_type, template_type,
-            subject, gmail_message_id, gmail_thread_id, status, error_message,
+            sent_from_email, subject, gmail_message_id, gmail_thread_id, status, error_message,
             sent_at, process_date, created_at
      FROM email_logged ${whereSql}
      ORDER BY id DESC
@@ -130,12 +141,17 @@ async function listLogs({ page, pageSize, status, emailType, search, dateFrom, d
 }
 
 async function getLogById(id) {
-  const [rows] = await pool.query('SELECT * FROM email_logged WHERE id = ? LIMIT 1', [Number(id)]);
+  const senderEmail = await getConnectedSenderEmail();
+  const [rows] = await pool.query(
+    'SELECT * FROM email_logged WHERE id = ? AND sent_from_email = ? LIMIT 1',
+    [Number(id), senderEmail]
+  );
   return rows[0] || null;
 }
 
 /** Aggregate counters for the dashboard. */
 async function getStats() {
+  const senderEmail = await getConnectedSenderEmail();
   const [rows] = await pool.query(
     `SELECT
        COUNT(*)                                                              AS totalLogs,
@@ -146,7 +162,9 @@ async function getStats() {
        COALESCE(SUM(email_type = 'NEW_EMAIL' AND status = 'SUCCESS'), 0)     AS newEmailsSent,
        COALESCE(SUM(mail_found = 1), 0)                                      AS mailsFound,
        COALESCE(SUM(status = 'SUCCESS' AND sent_at >= CURDATE()), 0)         AS sentToday
-     FROM email_logged`
+     FROM email_logged
+     WHERE sent_from_email = ?`,
+    [senderEmail]
   );
   const r = rows[0];
   // mysql2 returns BIGINT SUMs as strings — normalize to numbers

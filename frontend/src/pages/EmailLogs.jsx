@@ -112,6 +112,13 @@ export default function EmailLogs() {
       ),
     },
     {
+      key: 'sent_from_email',
+      header: 'Sent From',
+      width: '220px',
+      className: 'break-all whitespace-normal',
+      render: (r) => <span className="text-xs text-slate-600">{r.sent_from_email || '—'}</span>,
+    },
+    {
       key: 'mail_found',
       header: 'Prev Mail',
       width: '95px',
@@ -321,6 +328,7 @@ export default function EmailLogs() {
             {[
               ['Name', detail.name || '—'],
               ['Email', detail.email],
+              ['Sent From', detail.sent_from_email || '—'],
               ['Previous Mail', detail.mail_found === null ? '—' : detail.mail_found ? 'Yes' : 'No'],
               ['Email Type', detail.email_type === 'FOLLOW_UP' ? 'Follow-up' : 'New Email'],
               ['Template (weekday)', detail.template_type],
