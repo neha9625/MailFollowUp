@@ -12,7 +12,7 @@ const GMAIL_SCOPES = [
 ];
 
 function isGoogleConfigured() {
-  return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+  return Boolean((process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID_NEHA ) && (process.env.GOOGLE_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET_NEHA ));
 }
 
 function resolveRedirectUri() {
@@ -30,8 +30,8 @@ function createOAuthClient() {
     );
   }
   return new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID_NEHA,
+    process.env.GOOGLE_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET_NEHA,
     resolveRedirectUri()
   );
 }
