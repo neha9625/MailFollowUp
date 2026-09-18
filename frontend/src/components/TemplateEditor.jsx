@@ -12,6 +12,12 @@ function interpolate(text, vars) {
   });
 }
 
+function addNameToGreeting(text, name) {
+  return name
+    ? text.replace(/^(\s*(?:hi|hello|dear)\s*),/i, (match, greeting) => `${greeting}${name},`)
+    : text;
+}
+
 /**
  * Template editor modal: subject + body with variable help and a live preview
  * rendered with sample data (John / john@example.com).
@@ -39,7 +45,7 @@ export default function TemplateEditor({ open, template, saving, onSave, onClose
   const rendered = useMemo(
     () => ({
       subject: interpolate(subject, SAMPLE_VARS),
-      body: interpolate(body, SAMPLE_VARS),
+      body: addNameToGreeting(interpolate(body, SAMPLE_VARS), SAMPLE_VARS.name),
     }),
     [subject, body]
   );

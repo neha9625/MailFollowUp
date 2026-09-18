@@ -15,6 +15,12 @@ function interpolate(text, vars) {
   });
 }
 
+function addNameToGreeting(text, name) {
+  return name
+    ? text.replace(/^(\s*(?:hi|hello|dear)\s*),/i, (match, greeting) => `${greeting}${name},`)
+    : text;
+}
+
 function SectionHeader({ type, title, subtitle, iconBg, count }) {
   return (
     <div className="flex items-center gap-3">
@@ -173,7 +179,7 @@ export default function Templates() {
               </p>
             </div>
             <div className="p-4 whitespace-pre-line text-sm text-slate-700 leading-relaxed">
-              {interpolate(previewing.body, SAMPLE_VARS)}
+              {addNameToGreeting(interpolate(previewing.body, SAMPLE_VARS), SAMPLE_VARS.name)}
             </div>
           </div>
         )}

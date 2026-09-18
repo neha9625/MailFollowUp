@@ -32,6 +32,12 @@ function textToHtml(text) {
     .join('');
 }
 
+/** Adds the Excel name to a greeting written as "Hi ," or "Hello ,". */
+function addNameToGreeting(text, name) {
+  if (!name) return text;
+  return text.replace(/^(\s*(?:hi|hello|dear)\s*),/i, (match, greeting) => `${greeting}${name},`);
+}
+
 /**
  * @param {{subject: string, body: string}} template
  * @param {{name: string, email: string}} vars
@@ -44,7 +50,7 @@ function renderTemplate(template, vars) {
   const ctx = { name, email, Name: display, NAME: name.toUpperCase() };
 
   const subject = interpolate(template.subject, ctx).replace(/\s+/g, ' ').trim();
-  const text = interpolate(template.body, ctx).trim();
+  const text = addNameToGreeting(interpolate(template.body, ctx).trim(), name);
   const html =
     `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;` +
     `line-height:1.6;color:#1f2937;">${textToHtml(text)}</div>`;
