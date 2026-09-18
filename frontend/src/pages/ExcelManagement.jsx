@@ -188,8 +188,8 @@ export default function ExcelManagement() {
       <div className="card p-5">
         <h2 className="card-title mb-1">Upload New File</h2>
         <p className="text-xs text-slate-400 mb-4">
-          Required columns: <code className="text-slate-600">Email</code> and{' '}
-          <code className="text-slate-600">Name</code> · .xlsx / .xls · max {MAX_SIZE_MB} MB
+          Required columns: <code className="text-slate-600">email</code> and{' '}
+          <code className="text-slate-600">name</code> · .xlsx / .xls · max {MAX_SIZE_MB} MB
         </p>
 
         <div

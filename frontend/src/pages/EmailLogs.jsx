@@ -32,10 +32,9 @@ export default function EmailLogs() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [detail, setDetail] = useState(null); // selected log
+  const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
-  // Debounce the search box
   useEffect(() => {
     const t = setTimeout(() => {
       setFilters((f) => ({ ...f, search: searchInput }));
@@ -63,7 +62,7 @@ export default function EmailLogs() {
   useEffect(fetchLogs, [fetchLogs]);
 
   function openDetail(log) {
-    setDetail(log); // instant rows we already have
+    setDetail(log);
     setDetailLoading(true);
     logApi
       .getById(log.id)
@@ -77,13 +76,46 @@ export default function EmailLogs() {
     setPage(1);
   }
 
+  // ---------- COLUMNS (updated with widths + proper wrapping) ----------
   const columns = [
-    { key: 'created_at', header: 'Date', render: (r) => new Date(r.created_at).toLocaleString() },
-    { key: 'name', header: 'Name', render: (r) => r.name || '—' },
-    { key: 'email', header: 'Email', render: (r) => <span className="break-all">{r.email}</span> },
+    {
+      key: 'created_at',
+      header: 'Date',
+      width: '120px',
+      wrap: false,
+      render: (r) => {
+        const d = new Date(r.created_at);
+        return (
+          <div className="leading-tight">
+            <div className="text-slate-700">{d.toLocaleDateString()}</div>
+            <div className="text-xs text-slate-400">
+              {d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'name',
+      header: 'Name',
+      width: '90px',
+      wrap: false,
+      render: (r) => r.name || '—',
+    },
+    {
+      key: 'email',
+      header: 'Email',
+      width: '220px',
+      className: 'break-all whitespace-normal',
+      render: (r) => (
+        <span className="text-xs text-slate-600">{r.email}</span>
+      ),
+    },
     {
       key: 'mail_found',
-      header: 'Previous Mail',
+      header: 'Prev Mail',
+      width: '95px',
+      wrap: false,
       render: (r) =>
         r.mail_found === null || r.mail_found === undefined ? (
           '—'
@@ -96,36 +128,91 @@ export default function EmailLogs() {
     {
       key: 'email_type',
       header: 'Email Type',
+      width: '110px',
+      wrap: false,
       render: (r) =>
         r.email_type === 'FOLLOW_UP' ? (
-          <span className="px-2 py-1 rounded-full text-[11px] font-bold bg-violet-50 text-violet-700">Follow-up</span>
+          <span className="px-2 py-1 rounded-full text-[11px] font-bold bg-violet-50 text-violet-700">
+            Follow-up
+          </span>
         ) : (
-          <span className="px-2 py-1 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700">New Email</span>
+          <span className="px-2 py-1 rounded-full text-[11px] font-bold bg-sky-50 text-sky-700">
+            New Email
+          </span>
         ),
     },
-    { key: 'template_type', header: 'Template', render: (r) => r.template_type },
+    {
+      key: 'template_type',
+      header: 'Template',
+      width: '100px',
+      wrap: false,
+      render: (r) => r.template_type || '—',
+    },
     {
       key: 'subject',
       header: 'Subject',
-      render: (r) => <span className="block max-w-[220px] truncate">{r.subject || '—'}</span>,
+      // no width => takes remaining space
+      render: (r) => (
+        <span
+          className="text-slate-700"
+          title={r.subject || ''}
+          style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {r.subject || '—'}
+        </span>
+      ),
     },
-    { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.status} /> },
+    {
+      key: 'status',
+      header: 'Status',
+      width: '100px',
+      wrap: false,
+      render: (r) => <StatusBadge status={r.status} />,
+    },
     {
       key: 'error_message',
       header: 'Error',
+      width: '140px',
       render: (r) =>
         r.error_message ? (
-          <span className="block max-w-[180px] truncate text-red-600" title={r.error_message}>
+          <span
+            className="block text-xs text-red-600"
+            title={r.error_message}
+            style={{
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
             {r.error_message}
           </span>
         ) : (
-          '—'
+          <span className="text-slate-400">—</span>
         ),
     },
     {
       key: 'sent_at',
       header: 'Sent At',
-      render: (r) => (r.sent_at ? new Date(r.sent_at).toLocaleString() : '—'),
+      width: '110px',
+      wrap: false,
+      render: (r) => {
+        if (!r.sent_at) return <span className="text-slate-400">—</span>;
+        const d = new Date(r.sent_at);
+        return (
+          <div className="leading-tight">
+            <div className="text-slate-700">{d.toLocaleDateString()}</div>
+            <div className="text-xs text-slate-400">
+              {d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          </div>
+        );
+      },
     },
   ];
 
@@ -235,10 +322,7 @@ export default function EmailLogs() {
               ['Name', detail.name || '—'],
               ['Email', detail.email],
               ['Previous Mail', detail.mail_found === null ? '—' : detail.mail_found ? 'Yes' : 'No'],
-              [
-                'Email Type',
-                detail.email_type === 'FOLLOW_UP' ? 'Follow-up' : 'New Email',
-              ],
+              ['Email Type', detail.email_type === 'FOLLOW_UP' ? 'Follow-up' : 'New Email'],
               ['Template (weekday)', detail.template_type],
               ['Subject', detail.subject || '—'],
               ['Status', <StatusBadge status={detail.status} />],
